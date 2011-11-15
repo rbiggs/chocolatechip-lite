@@ -59,35 +59,29 @@ Version 1.0
 		}
 		return this;
 	};
-	 
+	
+	$.extend(Array.prototype, {
+		each : Array.prototype.forEach
+	});
+	
 	$.extend($, {
  
 		version : "1.0",
 		
 		libraryName : "ChocolateChip-Lite",
 		 
-		collectionToArray : function ( collection ) {
-			var array = [];
-			var i = 0, len = collection.length;
-			while ( i < len ) {
-				array[i] = collection[i];
-				i++;
-			}
-			return array;
-		},
-		 
 		$$ : function ( selector, context ) {
 			if (!!context) {
 				if (typeof context === "string") {
-					return $.collectionToArray(document.querySelectorAll(context + " " + selector));
+					return [].slice.apply(document.querySelectorAll(context + " " + selector));
 				} else if (context.nodeType === 1){
-					return $.collectionToArray(context.querySelectorAll(selector));
+					return [].slice.apply(context.querySelectorAll(selector));
 				}
 			} else {
-				return $.collectionToArray(document.querySelectorAll(selector));
+				return [].slice.apply(document.querySelectorAll(selector));
 			}
 		},
-		 
+		
 		make : function ( HTMLString ) {
 			var nodes = [];
 			var temp = document.createElement("div");
@@ -118,6 +112,15 @@ Version 1.0
 			});
 		}
 	});
+	
+	$.extend(Object.prototype, {
+		each: function(callback, objectLength) {
+			for (key in this) {
+				if(callback(key, this[key]) === false) { return this; }
+			}
+		}
+	});
+	
 	$.extend(HTMLElement.prototype, {
 	
 		find : function ( selector ) {
@@ -353,7 +356,7 @@ Version 1.0
 		delegate : function ( selector, event, callback ) {
 			this.addEventListener(event, function(e) {
 				var target = e.target;
-				$.$$(selector, this).forEach(function(element) {
+				$.$$(selector, this).each(function(element) {
 					if (element.isSameNode(target)) {
 						callback.apply(this, arguments);
 					} else {

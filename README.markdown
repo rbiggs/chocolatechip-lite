@@ -11,10 +11,14 @@ Although it resembles jQuery it differs in that there is no object obfuscation w
     // Will only affect the first paragraph.
     $("p").css(" background-color: yellow; color: red; "); 
    
-When you get a collection with $$(selector) you get back an array. You can act on all items in that array using Array.forEach(). Pass an anonymous function inside of which you define what you want to do with each item in the array. You can pass an alias as the anonymous function's parameter which will represent each item in the array during the iteration process.
+When you get a collection with $$(selector) you get back an array. You can act on all items in that array using Array.forEach() or Array.each(). The later is a convenience for typing less. Pass it an anonymous function, inside of which you define what you want to do with each item in the array. You can pass an alias as the anonymous function's parameter which will represent each item in the array during the iteration process.
  
     // Get all paragraphs (use "paragraph" as an alias for each array item):
     $$("p").forEach(function(paragraph) {
+       paragraph.css("{ background-color: yellow; color: red; }"); 
+    });
+	// or: 
+    $$("p").each(function(paragraph) {
        paragraph.css("{ background-color: yellow; color: red; }"); 
     });
  
@@ -23,7 +27,7 @@ When you get a collection with $$(selector) you get back an array. You can act o
 ChocolateChip provides a convenient way to allow you to access the DOM when it is done loading but before it gets output to the screen. You use the $.ready method and pass it an anonymous function inside of which you put all the code you wish to execute:
  
 	$.ready(function() {
-		$$("li > a").forEach(function(link) {
+		$$("li > a").each(function(link) {
     		link.css("{ display: inline-block; border: solid 1px red; }");
         	link.bind("touchstart", function handleLink() {
 				// Do something here.
@@ -34,7 +38,7 @@ ChocolateChip provides a convenient way to allow you to access the DOM when it i
 You can use a shorthand for as well by passing the anonymous function directly to the $() method:
  
     $(function() {
-		$$("li > a").forEach(function(link) {
+		$$("li > a").each(function(link) {
         	link.css("{ display: inline-block; border: solid 1px red; }");
         	link.bind("touchstart", function handleLink() {
             	// Do something here.
@@ -75,8 +79,28 @@ ChocolateChip allows you to bind events or delegate them.
     $.templates() // 
     $.templateCache()
     $.template()
- 
-HTMLElement Extensions:
+
+**Array Extension:**
+	
+	[].each()// Iterate over an array:
+	  
+	// In the example below, item will be equal to each the value of each index of the array.
+	// idx will be equal to the integer value of the array index, starting from 0.
+	var arr = ["item 1", "item 2", "item 3", "item 4", "item 5"];
+	arr.each(function(item, idx) {
+		console.log("Item " + ++idx + " is: " + item);
+	});
+
+**Object Extension:**
+
+	Object.each() // Iterate over the object's keys.
+	
+	var obj = {"i-1": "item 1", "i-2":"item 2", "i-3":"item 3", "another-one":"item 4", "something-else":"item 5"};
+	obj.each(function(key, value) {
+		$("ol").append("<li>" + value + "</li>");
+	});
+
+**HTMLElement Extensions:**
  
     HTMLElement.previous() // Get the previous node.
     HTMLElement.next() // Get the next node.
@@ -105,6 +129,6 @@ HTMLElement Extensions:
     HTMLElement.xhrjson() // Do basic JSON binding.
  
  
-Properties:
+**Properties:**
  
     $.events - an array

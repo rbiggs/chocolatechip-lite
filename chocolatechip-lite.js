@@ -1,11 +1,11 @@
 /*		  
-	pO\		
+    pO\		
    6  /\
-	 /OO\
-	/OOOO\
+     /OO\
+    /OOOO\
   /OOOOOOOO\
  ((OOOOOOOO))
-  \:~=++=~:/  
+  \:~=++=~:/   
 		
 ChocolateChip.js: It's tiny but delicious
 A JavaScript library for mobile Web app development.
@@ -441,47 +441,50 @@ Version 1.0
 			}
 		},
 
-		xhr : function ( url, options ) {
-			var o = options ? options : {};
-			var successCallback = null;
-			var errorCallback = null;
-			if (!!options) {
-				if (!!options.successCallback || !!options.success) {
-					successCallback = options.successCallback || options.success;
-				}
+	  xhr : function ( options ) {
+		 var o = options ? options : {};
+		 var successCallback = null;
+		 var errorCallback = options.error || $.noop;
+		 if (!!options) {
+			if (!!o.successCallback || !!o.success) {
+			   successCallback = o.successCallback || o.success;
 			}
-			var that = this,
-				request	   = new XMLHttpRequest(),
-				method = o.method || 'get',
-				async  = o.async || false,			 
-				params = o.data || null,
-				i = 0;
-			request.queryString = params;
-			request.open(method, url, async);
-			if (o.headers) {
-				for (; i<o.headers.length; i++) {
-				  request.setRequestHeader(o.headers[i].name, o.headers[i].value);
-				}
+		 }
+		 var request = new XMLHttpRequest(),
+			method = o.method || 'get',
+			async  = o.async || false,        
+			params = o.data || null,
+			i = 0;
+		 request.queryString = params;
+		 request.open(method, o.url, async);
+			if (!!o.headers) {  
+			 for (var prop in o.headers) { 
+				 if(o.headers.hasOwnProperty(prop)) { 
+					 request.setRequestHeader(prop, o.headers[prop]);
+				 }
+			 }
+		 }
+		 request.handleResp = (successCallback !== null) ? successCallback : $.noop; 
+		 function hdl(){ 
+			if(request.status===0 || request.status==200 && request.readyState==4) {   
+			   $.responseText = request.responseText;
+			   request.handleResp(request.responseText); 
+			} else {
+			   if (!!o.errorCallback || !!o.error) {
+				  var errorCallback = o.errorCallback || o.error;
+				  errorCallback(request);
+			   }
 			}
-			request.handleResp = (successCallback !== null) ? successCallback : function() { 
-				that.insert(this.responseText); 
-			}; 
-			function hdl(){ 
-				if(request.status===0 || request.status==200 && request.readyState==4) {	
-					$.responseText = request.responseText;
-					request.handleResp(); 
-				} else {
-					if (!!options.errorCallback || !!options.error) {
-						var errorCallback = options.errorCallback || options.error;
-						errorCallback();
-					}
-				}
-			}
-			if(async) request.onreadystatechange = hdl;
-			request.send(params);
-			if(!async) hdl();
-			return this;
-		},
+		 }
+		 if(async) request.onreadystatechange = hdl;
+		 request.send(params);
+		 if(!async) hdl();
+		 return this;
+	  },
+  
+	  ajax : function( options ) {
+		return $.xhr(options);
+	  },
 		 
 		xhrjson : function ( url, options ) {
 			if (options === "undefined") {

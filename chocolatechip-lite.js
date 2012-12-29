@@ -17,26 +17,54 @@ Version 1.0
 */
  
 (function() {
-	var $ = function ( selector, context ) {
-		if (!!context) {
-			if (typeof context === "string") {
-				return document.querySelector(context + " " + selector);
-			} else if (context.nodeType === 1) {
-				return context.querySelector(selector);
-			} 
-		} else if (typeof selector === "function") {
-			$.ready(function() {
-				selector.call(selector);
-				return this;
-			});
-		} else {
-			return document.querySelector(selector);
-		}
-		return false;
+   var $ = function ( selector, context ) {
+      if (typeof selector === 'undefined') {
+         return document;
+      }
+      if (selector === window || selector === document) {
+         return selector;
+      }
+      if (typeof selector === 'object' && selector.nodeType === 1) {
+         return selector;
+      }
+      if (!!context) {
+         if (typeof context === 'string') {
+            return document.querySelector(context + ' ' + selector);
+         } else if (context.nodeType === 1) {
+            return context.querySelector(selector);
+         } 
+      } else if (typeof selector === 'function') {
+         $.ready(function() {
+            return selector.call(selector);
+         });
+      } else {
+      	if (document.querySelector(selector)) {
+         	return document.querySelector(selector);
+         } else {
+         	return;
+         }
+      }
+	  return false;
 	};
  
-	$.extend = function(obj, prop) {
-		if (!Object.keys) {
+   $.extend = function(obj, prop, enumerable) {
+   	enumerable = enumerable || false;
+   	if (!prop) {
+   		prop = obj;
+   		obj = $;
+   	}
+		if (Object.keys) {
+			Object.keys(prop).forEach(function(p) {
+				if (prop.hasOwnProperty(p)) {
+					Object.defineProperty(obj, p, {
+						value: prop[p],
+                  writable: true,
+                  enumerable: enumerable,
+                  configurable: true
+               });
+            }
+         });
+		} else {
 			if (!prop) {
 				prop = obj;
 				obj = this;
@@ -45,28 +73,60 @@ Version 1.0
 				obj[i] = prop[i];
 			}
 			return obj;
-		} else {
-			Object.keys(prop).forEach(function(p) {
-				if (prop.hasOwnProperty(p)) {
-					Object.defineProperty(obj, p, {
-						value: prop[p],
-						writable: true,
-						enumerable: false,
-						configurable: true
-					});
-				}
-			});
-		}
-		return this;
+      }
+      return this;
+   };
+   
+	if (!Object.keys) {
+	  Object.keys = (function () {
+		 var hasOwnProperty = Object.prototype.hasOwnProperty,
+			  hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+			  dontEnums = [
+				 'toString',
+				 'toLocaleString',
+				 'valueOf',
+				 'hasOwnProperty',
+				 'isPrototypeOf',
+				 'propertyIsEnumerable',
+				 'constructor'
+			  ],
+			  dontEnumsLength = dontEnums.length;
+	 
+		 return function (obj) {
+			if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object');
+	 
+			var result = [];
+	 
+			for (var prop in obj) {
+			  if (hasOwnProperty.call(obj, prop)) result.push(prop);
+			}
+	 
+			if (hasDontEnumBug) {
+			  for (var i=0; i < dontEnumsLength; i++) {
+				 if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
+			  }
+			}
+			return result;
+		 }
+	  })()
 	};
 	
 	$.extend(Array.prototype, {
-		each : Array.prototype.forEach
+      each : function(fn, ctx) {
+      	if (typeof fn != "function") return;
+      	var i, l = this.length;
+      	var ctx = arguments[1];
+      	for (i = 0; i < l; i++) {
+      	  if (i in this) {
+        	fn.call(ctx, this[i], i, this);
+          }
+      	}
+      }
 	});
 	
 	$.extend($, {
  
-		version : "1.0",
+		version : "1.1",
 		
 		libraryName : "ChocolateChip-Lite",
 		 
@@ -201,12 +261,12 @@ Version 1.0
 		}, 
 
 		text : function ( value ) {
-			if (!!value) {
-				this.innerText = value;
-				return this;
-			} else {
-				return this.innerText;
-			}
+		  if (!!value || value === 0) {
+			this.innerText = value;
+			return this;
+		  } else {
+			return this.innerText;
+		  }
 		},
 		 
 		fill : function ( content ) {
@@ -226,6 +286,7 @@ Version 1.0
 		},
 		 
 		remove : function ( ) {
+            this.unbind();
 			this.removeEvents();
 			this.parentNode.removeChild(this);
 		},
@@ -541,10 +602,10 @@ Version 1.0
 		}		
 	});
 	
-	window.$chocolatechip = $;
-	window.$$chocolatechip = $.$$;
-	if (window.$ === undefined) {
-		window.$chocolatechip = window.$ = $;
-		window.$$chocolatechip = window.$$ = $.$$;
-	}
+    window.$chocolatechip = $;
+    window.$$chocolatechip = $.$$;
+    if (typeof window.$ === 'undefined') {
+       window.$chocolatechip = window.$ = $;
+       window.$$chocolatechip = window.$$ = $.$$;
+    }
 })(); 

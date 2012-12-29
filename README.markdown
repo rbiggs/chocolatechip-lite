@@ -1,7 +1,4 @@
----
-title: ChocolateChip-Lite - A Compact JavaScript Framework for Mobile Webkit
----
- 
+
 #ChocolateChip.js - A Compact JavaScript Framework for Mobile Webkit
  
 ChocolateChip is a light weight framework. It retains its small size by avoiding desktop and legacy browser support, choosing to support the latest standards in modern mobile browsers using Webkit. It's 13 KB, minified it's 8 KB.
